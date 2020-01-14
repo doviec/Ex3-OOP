@@ -121,7 +121,6 @@ public class Game {
 	}
 	//adds fruit to map
 	public void addFruit(List<String> fruits) {
-
 		for (String fruit : fruits ) {
 			Fruit f = new Fruit(fruit);
 			fruitMap.put(f.getLocation(), f);
@@ -148,5 +147,4 @@ public class Game {
 			}
 		}
 	}
-
 }

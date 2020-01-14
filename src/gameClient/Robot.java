@@ -73,5 +73,4 @@ public class Robot {
 	public void setPoint(Point3D point) {
 		this.point = new Point3D(point);
 	}
-
 }

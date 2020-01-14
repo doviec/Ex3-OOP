@@ -86,14 +86,12 @@ public class guiGraph extends JFrame implements ActionListener, MouseListener
 		menuBar.add(menu);
 		this.setMenuBar(menuBar);
 
-
 		MenuItem op_addNode = new MenuItem("play");
 		op_addNode.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				play();
-
 			}
 		});
 		menu.add(op_addNode);

@@ -16,9 +16,8 @@ public class Fruit {
 	private int added; //-1 will represent no and 1 will be for yes
 
 	public Fruit() {
-		
+
 	}
-	
 	public Fruit(String jsonString) {
 		try {
 			JSONObject fruit = new JSONObject(jsonString);
