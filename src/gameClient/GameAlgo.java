@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,6 +15,7 @@ import dataStructure.DGraph;
 import dataStructure.edge_data;
 import dataStructure.graph;
 import dataStructure.node_data;
+import gui.guiRobotPoint;
 import utils.Point3D;
 /**
  * This class represents the elements for the game; robot, fruit, graph
@@ -40,13 +42,11 @@ public class GameAlgo {
 	public GameAlgo(int scenario) {
 		this.fruitMap = new Hashtable<>();
 		this.robotMap = new Hashtable<>();
-		game_service game = Game_Server.getServer(scenario);
-		this.gameService = game;
-		this.g = new DGraph(game.getGraph());
-		addFruit(game.getFruits());
+		this.gameService = Game_Server.getServer(scenario);
+		this.g = new DGraph(this.gameService.getGraph());
+		addFruit(this.gameService.getFruits());
 		addRobotsToGame();   //before adding to the list you must add robots to the game
-		game.startGame();
-		addRobotsToMap(game.getRobots());
+		addRobotsToMap(this.gameService.getRobots());
 
 
 	}//adds robots to the game sever, uses a method to add to specific node
@@ -128,6 +128,7 @@ public class GameAlgo {
 	}
 	//adds fruit to map
 	public void addFruit(List<String> fruits) {
+		fruitMap.clear();
 		for (String fruit : fruits ) {
 			Fruit f = new Fruit(fruit);
 			fruitMap.put(f.getLocation(), f);
@@ -149,11 +150,40 @@ public class GameAlgo {
 				destToFruit = pDest.distance2D(pFruit);
 				if (Math.abs(edgeLength - (srcToFruit + destToFruit)) <= Point3D.EPS2) {
 					f.setEdge(edge);
-					System.out.println(" " +f.getEdge().getSrc() +" : " + f.getEdge().getDest());
 					return;
 				}
 			}
 		}
+	}
+	//this function updates the fruit and robot to the server
+	public void update() {
+		addFruit(this.gameService.getFruits());
+		addRobotsToGame();   //before adding to the list you must add robots to the game
+		addRobotsToMap(this.gameService.getRobots());
+	}
+	//function to find if user pressed on a robot
+	public int robotPressed(int x,int y,guiRobotPoint robotPoint) {
+		try {
+			if (!gameService.isRunning()) {
+				return -1;
+			}
+			String s = this.gameService.toString();
+			JSONObject gameServer = new JSONObject(s);
+			gameServer = gameServer.getJSONObject("GameServer");
+			int numRobot = gameServer.getInt("robots");
+			Point3D guiP = new Point3D(x,y);
+			for (int i = 0; i < numRobot; i++ ) {
+				int xRobot = robotPoint.getPoint(i).ix();
+				int yRobot = robotPoint.getPoint(i).iy(); 
+				Point3D thisP = new Point3D(xRobot,yRobot);
+				if (thisP.distance2D(guiP) <= 5) {
+					return i;
+				}
+			}
+		}catch(Exception ex) {
+
+		}
+		return -1;
 	}
 	public Hashtable<Point3D, Fruit> getFruitMap() {
 		return this.fruitMap;

@@ -14,7 +14,6 @@ public class guiRobotPoint {
 
 	private Map<Integer,Point3D> robotPoint; 
 
-
 	public guiRobotPoint() {
 		robotPoint = new HashMap<Integer, Point3D>();
 	}

@@ -47,8 +47,9 @@ public class guiDrawGame extends JFrame implements ActionListener, MouseListener
 	private guiFruitPoint fruitPoint; 
 	private guiRobotPoint robotPoint;
 	private GameAlgo gameAlgo;
+	private boolean automatic;
 	private double xMax, yMax, xMin,yMin;
-
+	
 
 	public guiDrawGame() {
 		this.gameAlgo = new GameAlgo();
@@ -61,8 +62,9 @@ public class guiDrawGame extends JFrame implements ActionListener, MouseListener
 		this.yMin = 99999;
 
 	}
-	public guiDrawGame(GameAlgo ga) {
+	public guiDrawGame(GameAlgo ga, boolean flag) {
 		this();
+		this.automatic = flag;
 		this.gameAlgo = ga;
 		initGUI(WIDTH, HEIGHT);
 		this.setVisible(true);
@@ -104,13 +106,17 @@ public class guiDrawGame extends JFrame implements ActionListener, MouseListener
 			}
 		});
 		menu.add(op_addNode);
-		this.addMouseListener(this);
 		this.setMenuBar(menuBar);
 		this.setVisible(true);
 		this.addMouseListener(this);
+		if (!automatic) {
+			this.addMouseListener(this);
+		}
 	}
 	public void paint(Graphics g) {
+		
 		paintGraph(g);
+		setTime(g);
 		paintFruit(g);
 		paintRobot(g);
 	}
@@ -125,6 +131,11 @@ public class guiDrawGame extends JFrame implements ActionListener, MouseListener
 		switch (action) {
 		case "play" : play();
 		}
+	}
+	private void setTime(Graphics g) {
+		g.setColor(Color.BLACK);
+		g.setFont(new Font("David", Font.ITALIC, 20));
+		g.drawString("Time: " + this.gameAlgo.getGameService().timeToEnd() / 1000, WIDTH - 200, 70);
 	}
 	public void paintGraph(Graphics g)
 	{
@@ -224,28 +235,39 @@ public class guiDrawGame extends JFrame implements ActionListener, MouseListener
 			y = scale(y, yMin, yMax, 100,HEIGHT-100);
 			g.setColor(Color.green);
 			g.fillOval((int)x - 2 , (int)y - 4 , 15, 15);
-			System.out.println("robot number" + robot.getId()+" "+robot.getLocation());
 			this.robotPoint.setPoint(robot.getId(),new Point3D(x,y));
 			}
 	}
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		System.out.println("mouseClicked");
+		if (!gameAlgo.getGameService().isRunning()) {
+			return;
+		}
+		
 	}
+	
 	@Override
 	public void mousePressed(MouseEvent e) {
+		
+		int xPress = e.getX();
+		int yPress = e.getY();
+		int robotID = this.gameAlgo.robotPressed(xPress, yPress, robotPoint);
+		if (robotID != -1) {
+			String dest = JOptionPane.showInputDialog("Enter destination for robot number: " + robotID);
+			int destination = Integer.parseInt(dest);
+			gameAlgo.getGameService().chooseNextEdge(robotID, destination);
+		}
+		
 	}
+	
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		System.out.println("mouseReleased");
 	}
 	@Override
 	public void mouseEntered(MouseEvent e) {
-		System.out.println("mouseEntered");
 	}
 	@Override
 	public void mouseExited(MouseEvent e) {
-		System.out.println("mouseExited");
 	}
 	
 	public static void main(String[] args) {
@@ -253,10 +275,10 @@ public class guiDrawGame extends JFrame implements ActionListener, MouseListener
 	}
 	@Override
 	public void run() {
-		while(this.gameAlgo.getGameService().isRunning()) {
-			repaint();
-		}
-		// TODO Auto-generated method stub
+//		while(this.gameAlgo.getGameService().isRunning()) {
+//			repaint();
+//			
+//		}
 		
 	}
 }

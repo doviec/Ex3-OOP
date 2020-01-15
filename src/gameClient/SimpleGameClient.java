@@ -35,7 +35,7 @@ public class SimpleGameClient {
 	public static void main(String[] a) {
 		test1();}
 	public static void test1() {
-		int scenario_num = 23;
+		int scenario_num = 19;
 		game_service game = Game_Server.getServer(scenario_num); // you have [0,23] games
 		System.out.println("robots are: " +game.getRobots());
 		System.out.println("fruits are : " +game.getFruits());
@@ -119,5 +119,6 @@ public class SimpleGameClient {
 		ans = itr.next().getDest();
 		return ans;
 	}
+	
 
 }
