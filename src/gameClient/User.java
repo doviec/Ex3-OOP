@@ -27,7 +27,7 @@ public class User extends Thread{
 			game_service gs = this.gameAlgo.getGameService();
 			gs.startGame();
 			while (gs.isRunning()) {
-				Thread.sleep(600);
+				Thread.sleep(500);
 				gs.move();
 				this.gameAlgo.update();
 				gui.repaint();				

@@ -1,8 +1,6 @@
 package gui;
 
 import java.awt.Color;
-import java.awt.FileDialog;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -13,12 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+import java.awt.image.BufferedImage;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -114,11 +107,20 @@ public class guiDrawGame extends JFrame implements ActionListener, MouseListener
 		}
 	}
 	public void paint(Graphics g) {
-		
-		paintGraph(g);
-		setTime(g);
-		paintFruit(g);
-		paintRobot(g);
+		BufferedImage bufferedImage = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2d = bufferedImage.createGraphics();
+
+		g2d.setBackground(new Color(240, 240, 240));
+		g2d.clearRect(0, 0, WIDTH, HEIGHT);
+
+		paintGraph(g2d);
+		setTime(g2d);
+		paintFruit(g2d);
+		paintRobot(g2d);
+
+		Graphics2D g2dComponent = (Graphics2D) g;
+		g2dComponent.drawImage(bufferedImage, null, 0, 0);
+
 	}
 
 	//all the functions of the menu arer written from here until the cases method
@@ -253,9 +255,13 @@ public class guiDrawGame extends JFrame implements ActionListener, MouseListener
 		int yPress = e.getY();
 		int robotID = this.gameAlgo.robotPressed(xPress, yPress, robotPoint);
 		if (robotID != -1) {
+			try {
 			String dest = JOptionPane.showInputDialog("Enter destination for robot number: " + robotID);
 			int destination = Integer.parseInt(dest);
 			gameAlgo.getGameService().chooseNextEdge(robotID, destination);
+			}catch(Exception ex) {
+				System.out.println("pressed wrong place");
+			}
 		}
 		
 	}

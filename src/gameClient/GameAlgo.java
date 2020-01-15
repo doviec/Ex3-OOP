@@ -176,7 +176,7 @@ public class GameAlgo {
 				int xRobot = robotPoint.getPoint(i).ix();
 				int yRobot = robotPoint.getPoint(i).iy(); 
 				Point3D thisP = new Point3D(xRobot,yRobot);
-				if (thisP.distance2D(guiP) <= 5) {
+				if (thisP.distance2D(guiP) <= 8) {
 					return i;
 				}
 			}
