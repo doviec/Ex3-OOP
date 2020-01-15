@@ -12,22 +12,24 @@ import utils.Point3D;
  * @author dovie
  *
  */
-public class guiPoint {
+public class guiGraphPoint {
 
-	private Map<Integer,Point3D> guiPoint; 
+	private Map<Integer,Point3D> graphPoint; 
+	
 
-	public guiPoint() {
-		guiPoint = new HashMap<Integer, Point3D>();
+	public guiGraphPoint() {
+		graphPoint = new HashMap<Integer, Point3D>();
+		
 	}
-	public guiPoint(graph graph) {
+	public guiGraphPoint(graph graph) {
 		for (node_data node : graph.getV()) {
-			guiPoint.put(node.getKey(), node.getLocation());
+			graphPoint.put(node.getKey(), node.getLocation());
 		}
 	}
 	public void setPoint(int key,Point3D p) {
-		guiPoint.put(key, p);
+		graphPoint.put(key, p);
 	}
 	public Point3D getPoint(int key) {
-		return this.guiPoint.get(key);
+		return this.graphPoint.get(key);
 	}
 }

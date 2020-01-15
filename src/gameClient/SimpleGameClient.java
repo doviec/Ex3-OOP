@@ -10,7 +10,7 @@ import org.json.JSONObject;
 import Server.Game_Server;
 import Server.game_service;
 import dataStructure.DGraph;
-import gui.guiGraph;
+import gui.guiDrawGame;
 import oop_dataStructure.OOP_DGraph;
 import oop_dataStructure.oop_edge_data;
 import oop_dataStructure.oop_graph;
@@ -44,7 +44,7 @@ public class SimpleGameClient {
 		gg.init(g);
 		game.addRobot(1);
 		System.out.println(game.getRobots());
-		guiGraph pri = new guiGraph(gg);
+		guiDrawGame pri = new guiDrawGame(scenario_num);
 		String info = game.toString();
 		JSONObject line;
 		try {
@@ -63,6 +63,7 @@ public class SimpleGameClient {
 		}
 		catch (JSONException e) {e.printStackTrace();}
 		game.startGame();
+		
 		// should be a Thread!!!
 		while(game.isRunning()) {
 //			moveRobots(game, gg);

@@ -21,29 +21,32 @@ import utils.Point3D;
  * @author dovie
  *
  */
-public class Game {
+public class GameAlgo {
 
 	private Hashtable<Point3D, Fruit> fruitMap;    // the point which is uniqe in this project represents the key
 	private Hashtable<Integer, Robot> robotMap;   // the key will  be the id
 	private graph g;
 	private game_service gameService;
 
-	public Game() {
+	public GameAlgo() {
+		//motivation for Hashtable - There are several differences between HashMap and Hashtable in Java:
+		//Hashtable is synchronized, whereas HashMap is not. This makes HashMap better for non-threaded
+		//applications, as unsynchronized Objects typically perform better than synchronized ones
 		this.fruitMap = new Hashtable<>();
 		this.robotMap = new Hashtable<>();
 		g = null;
 		gameService = null;
 	}
-	public Game(int scenario) {
+	public GameAlgo(int scenario) {
 		this.fruitMap = new Hashtable<>();
 		this.robotMap = new Hashtable<>();
 		game_service game = Game_Server.getServer(scenario);
 		this.gameService = game;
-		String graph = game.getGraph();
-		g = new DGraph(graph);
+		this.g = new DGraph(game.getGraph());
 		addFruit(game.getFruits());
 		addRobotsToGame();   //before adding to the list you must add robots to the game
-		addRobots(game.getRobots());
+		game.startGame();
+		addRobotsToMap(game.getRobots());
 
 
 	}//adds robots to the game sever, uses a method to add to specific node
@@ -65,7 +68,7 @@ public class Game {
 		for (Fruit fruits : this.getAllFruits()) {	//adds the nearest edge for each fruit
 			whichEdge(fruits);
 		}
-		if (numFruits <= numRobot) {   //if same amount of robots and fruits
+		if (numFruits <= numRobot) {   //if thers eqivlent or more robots then for each fruit add a robot
 			for (Fruit fruits : this.getAllFruits()) { //adds a robot to each fruit by the nearest direction
 				if (fruits.getEdge().getSrc() > fruits.getEdge().getDest()) {  //checks which number is bigger src or dest
 					largeNode = fruits.getEdge().getSrc();
@@ -84,7 +87,7 @@ public class Game {
 			for (int i = 0; i < numRobot - numFruits; i++) {  ///////////////// only if i want, add one robot in each corner (by i%2 add to size of nodes)
 				this.gameService.addRobot(i);
 			}
-		}else { // add value to highest value of fruit
+		}else { // add robots according to highest value of fruit
 			for (int i = 0; i < numRobot; i++) {
 				double maxValue = maxValueNotAdded();
 				int src = -0;
@@ -106,14 +109,18 @@ public class Game {
 				maxValue = fruits.getValue();
 			}
 		}
-		return maxValueNotAdded();
+		return maxValue;
 	}
 	//returns collection of fruit (helps for use of for each).
 	public Collection<Fruit> getAllFruits(){
 		return this.fruitMap.values();
 	}
+	//return collection of robots
+	public Collection<Robot> getAllRobots(){
+		return this.robotMap.values();
+	}
 	//adds robots to map
-	public void addRobots(List<String> robots) {
+	public void addRobotsToMap(List<String> robots) {
 		for (String robot : robots) {
 			Robot r = new Robot(robot);
 			robotMap.put(r.getId(), r);
@@ -140,11 +147,36 @@ public class Game {
 				edgeLength = pSrc.distance2D(pDest);
 				srcToFruit = pSrc.distance2D(pFruit);
 				destToFruit = pDest.distance2D(pFruit);
-				if (edgeLength - (srcToFruit + destToFruit) <= Point3D.EPS) {
+				if (Math.abs(edgeLength - (srcToFruit + destToFruit)) <= Point3D.EPS2) {
 					f.setEdge(edge);
+					System.out.println(" " +f.getEdge().getSrc() +" : " + f.getEdge().getDest());
 					return;
 				}
 			}
 		}
+	}
+	public Hashtable<Point3D, Fruit> getFruitMap() {
+		return this.fruitMap;
+	}
+	public void setFruitMap(Hashtable<Point3D, Fruit> fruitMap) {
+		this.fruitMap = fruitMap;
+	}
+	public Hashtable<Integer, Robot> getRobotMap() {
+		return this.robotMap;
+	}
+	public void setRobotMap(Hashtable<Integer, Robot> robotMap) {
+		this.robotMap = robotMap;
+	}
+	public graph getGraph() {
+		return this.g;
+	}
+	public void setGraph(graph g) {
+		this.g = g;
+	}
+	public game_service getGameService() {
+		return this.gameService;
+	}
+	public void setGameService(game_service gameService) {
+		this.gameService = gameService;
 	}
 }

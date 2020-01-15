@@ -28,7 +28,7 @@ public class Fruit {
 			this.value = value;
 			this.type = type;
 			this.location = point;
-			this.added = -1;
+			this.added = -1;  //represents no
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

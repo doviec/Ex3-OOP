@@ -67,10 +67,10 @@ public class Robot {
 	public void setSpeed(double speed) {
 		this.speed = speed;
 	}
-	public Point3D getPoint() {
-		return new Point3D(point);
-	}
-	public void setPoint(Point3D point) {
+	public void setLocation(Point3D point) {
 		this.point = new Point3D(point);
+	}
+	public Point3D getLocation() {
+		return new Point3D(point);
 	}
 }

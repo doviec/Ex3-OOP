@@ -5,6 +5,7 @@ import java.awt.FileDialog;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
@@ -28,57 +29,65 @@ import Server.Game_Server;
 import Server.game_service;
 import algorithms.Graph_Algo;
 import dataStructure.*;
+import gameClient.Fruit;
+import gameClient.GameAlgo;
+import gameClient.Robot;
 import oop_dataStructure.OOP_DGraph;
 import utils.Point3D;
 
-public class guiGraph extends JFrame implements ActionListener, MouseListener
+public class guiDrawGame extends JFrame implements ActionListener, MouseListener, Runnable
 {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID =28022802280228021L;
-	private graph graph;
-	private Graph_Algo algo;
-	private int MC;
-	private int nodeCounter;
-	private guiPoint guiPoint = new guiPoint();
+	private static final long serialVersionUID =1892189218921892L;
+	private static int WIDTH = 1400;
+	private static int HEIGHT = 900;
+	private guiGraphPoint graphPoint; 
+	private guiFruitPoint fruitPoint; 
+	private guiRobotPoint robotPoint;
+	private GameAlgo gameAlgo;
+	private double xMax, yMax, xMin,yMin;
 
 
-	public guiGraph() {
-		this.graph = new DGraph();
-		algo = new Graph_Algo();
-		algo.init(graph);
-		this.MC = graph.getMC();
-		initGUI(1100, 1000);
-		nodeCounter = graph.nodeSize();
+	public guiDrawGame() {
+		this.gameAlgo = new GameAlgo();
+		this.graphPoint = new guiGraphPoint();
+		this.fruitPoint = new guiFruitPoint();
+		this.robotPoint = new guiRobotPoint();
+		this.xMax = -99999;
+		this.yMax = -99999;
+		this.xMin = 99999;
+		this.yMin = 99999;
+
 	}
-	public guiGraph(graph gra) {
-		this.MC = gra.getMC();
-		this.graph = gra;
-		algo = new Graph_Algo();
-		algo.init(gra);
-		initGUI(1100, 1000);
-		this.setVisible(true);
-		nodeCounter = gra.nodeSize();
-	}
-	public guiGraph(graph gra, int width, int height)
-	{
-		this.MC = gra.getMC();
-		this.graph = gra;
-		algo.init(gra);
-		initGUI(1100, 1000);
-		initGUI(width, height);
-		nodeCounter = gra.nodeSize();
+	public guiDrawGame(GameAlgo ga) {
+		this();
+		this.gameAlgo = ga;
+		initGUI(WIDTH, HEIGHT);
 		this.setVisible(true);
 	}
+	public guiDrawGame(int num) {
+		this();
+		this.gameAlgo = new GameAlgo(num);
+		initGUI(WIDTH, HEIGHT);
+		this.setVisible(true);
+	}
+	public guiDrawGame(graph gg) {
+		this();
+		this.gameAlgo.setGraph(gg);
+		initGUI(WIDTH, HEIGHT);
+		this.setVisible(true);
+	}
+
 	/**
 	 * Initiate the bounds of the frame by a given width and height and adding menus
 	 */
-	private void initGUI(int width, int heigt) 
+	private void initGUI(int WIDTHT, int HEIGHT) 
 	{
-		this.setSize(width, heigt);
+		this.setSize(WIDTH, HEIGHT);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setBounds(0,0,width,heigt);
+		this.setBounds(0,0,WIDTH,HEIGHT);
 		this.setTitle("Dovies Workshop Welcome"); 
 
 		MenuBar menuBar = new MenuBar(); //menu bar initaite
@@ -96,25 +105,16 @@ public class guiGraph extends JFrame implements ActionListener, MouseListener
 		});
 		menu.add(op_addNode);
 		this.addMouseListener(this);
-		//incase of changes of MC the graph will be repainted
-		Thread thread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while(true) {
-					synchronized (this) {
-						if (graph.getMC() != MC) {
-							repaint();
-							MC = graph.getMC();
-						}
-					}
-				}
-			}
-		});
-		thread.start();
 		this.setMenuBar(menuBar);
 		this.setVisible(true);
 		this.addMouseListener(this);
 	}
+	public void paint(Graphics g) {
+		paintGraph(g);
+		paintFruit(g);
+		paintRobot(g);
+	}
+
 	//all the functions of the menu arer written from here until the cases method
 	public void play() {
 	}
@@ -126,24 +126,24 @@ public class guiGraph extends JFrame implements ActionListener, MouseListener
 		case "play" : play();
 		}
 	}
-	public void paint(Graphics g)
+	public void paintGraph(Graphics g)
 	{
-		Scale(this.graph);
+		Scale(this.gameAlgo.getGraph());
 		super.paint(g);
-		for (node_data node : graph.getV()) {
-			int x = (int)this.guiPoint.getPoint(node.getKey()).x();
-			int y = (int)this.guiPoint.getPoint(node.getKey()).y();
+		for (node_data node : this.gameAlgo.getGraph().getV()){
+			int x = (int)this.graphPoint.getPoint(node.getKey()).x();
+			int y = (int)this.graphPoint.getPoint(node.getKey()).y();
 			g.setColor(Color.BLUE);
 			g.fillOval(x - 3, y - 3, 8, 8);
 			g.setColor(Color.black);
 			g.setFont(new Font("David",Font.ITALIC, 18));
 			g.drawString(String.valueOf(node.getKey()), x+3, y + 3);
-			if ((graph.getE(node.getKey()) != null)) {
-				for (edge_data edge : graph.getE(node.getKey())) {
-					node_data destNode = graph.getNode(edge.getDest());
+			if ((this.gameAlgo.getGraph().getE(node.getKey()) != null)) {
+				for (edge_data edge :this.gameAlgo.getGraph().getE(node.getKey())) {
+					node_data destNode = this.gameAlgo.getGraph().getNode(edge.getDest());
 					g.setColor(Color.black);
-					int xDest = (int)this.guiPoint.getPoint(destNode.getKey()).x();     
-					int yDest = (int)this.guiPoint.getPoint(destNode.getKey()).y();
+					int xDest = (int)this.graphPoint.getPoint(destNode.getKey()).x();     
+					int yDest = (int)this.graphPoint.getPoint(destNode.getKey()).y();
 					g.drawLine(x, y, xDest, yDest);
 					g.setColor(Color.orange);
 					//to draw the way of the edge iv simply divided 4 times in a row the middle location of the edge.
@@ -155,10 +155,6 @@ public class guiGraph extends JFrame implements ActionListener, MouseListener
 		}
 	}
 	private void Scale(graph graph2) {
-		double xMax = -99999;
-		double yMax = -99999;
-		double xMin = 99999;
-		double yMin = 99999;
 		Point3D point;
 
 		for (node_data node : graph2.getV()) {
@@ -177,10 +173,10 @@ public class guiGraph extends JFrame implements ActionListener, MouseListener
 		for (node_data node : graph2.getV()) {
 			x = node.getLocation().x();
 			y = node.getLocation().y();
-			x = scale(x, xMin, xMax, 100,900);
-			y = scale(y, yMin, yMax, 100,800);
+			x = scale(x, xMin, xMax, 100,WIDTH-200);
+			y = scale(y, yMin, yMax, 100,HEIGHT-100);
 			point = new Point3D(x,y,0);
-			this.guiPoint.setPoint(node.getKey(),point);
+			this.graphPoint.setPoint(node.getKey(),point);
 		}
 	}
 	/**
@@ -196,6 +192,41 @@ public class guiGraph extends JFrame implements ActionListener, MouseListener
 	{
 		double res = ((data - r_min) / (r_max-r_min)) * (t_max - t_min) + t_min;
 		return res;
+	}
+	//paint the fruits on their edges
+	public void paintFruit(Graphics g) {
+		double x, y;
+		for (Fruit fruit : this.gameAlgo.getAllFruits()) {
+			x = fruit.getLocation().x();
+			y = fruit.getLocation().y();
+			x = scale(x, xMin, xMax, 100,WIDTH-200);
+			y = scale(y, yMin, yMax, 100,HEIGHT-100);
+			if (fruit.getType() == 1) {
+				g.setColor(Color.RED);
+			}else {
+				g.setColor(Color.MAGENTA);
+			}
+			g.fillOval((int)x - 2 , (int)y - 4 , 12, 12);
+			g.setColor(Color.blue);
+			g.setFont(new Font("David",Font.ITALIC, 18));
+			g.drawString(fruit.getValue() + "", (int)x + 2, (int)y + 2);
+			this.fruitPoint.setPoint(new Point3D(fruit.getLocation()), new Point3D(x,y)); //add to hashmap of points for future use
+			
+		}			
+	}
+	//paint robot
+	private void paintRobot(Graphics g) {
+		double x, y;
+		for (Robot robot : this.gameAlgo.getAllRobots()) {
+			x = robot.getLocation().x();
+			y = robot.getLocation().y();
+			x = scale(x, xMin, xMax, 100,WIDTH-200);
+			y = scale(y, yMin, yMax, 100,HEIGHT-100);
+			g.setColor(Color.green);
+			g.fillOval((int)x - 2 , (int)y - 4 , 15, 15);
+			System.out.println("robot number" + robot.getId()+" "+robot.getLocation());
+			this.robotPoint.setPoint(robot.getId(),new Point3D(x,y));
+			}
 	}
 	@Override
 	public void mouseClicked(MouseEvent e) {
@@ -216,7 +247,16 @@ public class guiGraph extends JFrame implements ActionListener, MouseListener
 	public void mouseExited(MouseEvent e) {
 		System.out.println("mouseExited");
 	}
+	
 	public static void main(String[] args) {
 
+	}
+	@Override
+	public void run() {
+		while(this.gameAlgo.getGameService().isRunning()) {
+			repaint();
+		}
+		// TODO Auto-generated method stub
+		
 	}
 }
